@@ -1,0 +1,182 @@
+{
+  "title": "Fractal VSM - Agent Performance",
+  "uid": "fractal-vsm-agents",
+  "tags": ["fractal", "vsm", "agents"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 0,
+  "refresh": "10s",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Agent Operations by Type",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_agent_operations_total[5m])",
+          "legendFormat": "{{agent_type}} - {{operation}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Operations/sec" }, { "format": "short" }]
+    },
+    {
+      "id": 2,
+      "title": "Agent Operation Latency (P95)",
+      "type": "graph",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(fractal_agent_operation_duration_seconds_bucket[5m])) by (le, agent_type, operation))",
+          "legendFormat": "{{agent_type}} - {{operation}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "s", "label": "Latency (P95)" }, { "format": "short" }]
+    },
+    {
+      "id": 3,
+      "title": "Research Stages Completed",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_research_stages_total[5m])",
+          "legendFormat": "{{stage}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Stages/sec" }, { "format": "short" }]
+    },
+    {
+      "id": 4,
+      "title": "Research Questions per Task",
+      "type": "graph",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(fractal_research_questions_per_task_bucket[5m])) by (le))",
+          "legendFormat": "P50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(fractal_research_questions_per_task_bucket[5m])) by (le))",
+          "legendFormat": "P95",
+          "refId": "B"
+        }
+      ],
+      "yaxes": [{ "format": "short", "label": "Questions" }, { "format": "short" }]
+    },
+    {
+      "id": 5,
+      "title": "Intelligence Analyses Triggered",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_intelligence_analyses_total[5m])",
+          "legendFormat": "{{trigger_type}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Analyses/sec" }, { "format": "short" }]
+    },
+    {
+      "id": 6,
+      "title": "Intelligence Analysis Duration",
+      "type": "graph",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(fractal_intelligence_analysis_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "P50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(fractal_intelligence_analysis_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "P95",
+          "refId": "B"
+        }
+      ],
+      "yaxes": [{ "format": "s", "label": "Duration" }, { "format": "short" }]
+    },
+    {
+      "id": 7,
+      "title": "Task Duration by Tier (P95)",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(fractal_tier_task_duration_seconds_bucket[5m])) by (le, tier, task_type))",
+          "legendFormat": "{{tier}} - {{task_type}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "s", "label": "Duration (P95)" }, { "format": "short" }]
+    },
+    {
+      "id": 8,
+      "title": "Memory Operations",
+      "type": "graph",
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_memory_operations_total[5m])",
+          "legendFormat": "{{memory_type}} - {{operation}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Operations/sec" }, { "format": "short" }]
+    },
+    {
+      "id": 9,
+      "title": "Event Store Operations",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 32, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_events_stored_total[5m])",
+          "legendFormat": "{{tier}} - {{event_type}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Events/sec" }, { "format": "short" }]
+    },
+    {
+      "id": 10,
+      "title": "Event Store Errors",
+      "type": "graph",
+      "gridPos": { "x": 12, "y": 32, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_event_store_errors_total[5m])",
+          "legendFormat": "{{error_type}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Errors/sec" }, { "format": "short" }],
+      "alert": {
+        "conditions": [
+          {
+            "evaluator": { "params": [0.05], "type": "gt" },
+            "operator": { "type": "and" },
+            "query": { "params": ["A", "5m", "now"] },
+            "reducer": { "params": [], "type": "avg" },
+            "type": "query"
+          }
+        ],
+        "executionErrorState": "alerting",
+        "frequency": "1m",
+        "handler": 1,
+        "name": "High Event Store Error Rate",
+        "noDataState": "no_data",
+        "notifications": []
+      }
+    }
+  ]
+}

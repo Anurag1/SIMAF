@@ -1,0 +1,112 @@
+# OpenTelemetry Collector Configuration
+# Receives traces, metrics, and logs from Fractal VSM application
+# Exports to Jaeger (traces) and Prometheus (metrics)
+#
+# Author: BMad
+# Date: 2025-01-20
+
+receivers:
+  # OTLP gRPC receiver (primary)
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # Prometheus receiver for scraping collector's own metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "otel-collector"
+          scrape_interval: 10s
+          static_configs:
+            - targets: ["localhost:8888"]
+
+processors:
+  # Batch processor for efficiency
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+
+  # Resource processor to add common attributes
+  resource:
+    attributes:
+      - key: service.namespace
+        value: "fractal-vsm"
+        action: upsert
+      - key: deployment.environment
+        value: "development"
+        action: upsert
+
+  # Span processor for trace enrichment
+  span:
+    name:
+      # Extract tier from span name (e.g., "s4.run_user_task" → tier=System4)
+      from_attributes: ["tier"]
+
+exporters:
+  # Jaeger exporter for traces
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  # Prometheus exporter for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: fractal_vsm
+    const_labels:
+      service: fractal-agent
+
+  # Debug exporter for debugging (replaces deprecated logging exporter)
+  debug:
+    verbosity: basic
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+
+  # pprof extension for profiling
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zPages extension for live debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, span, batch]
+      exporters: [otlp/jaeger, debug]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [memory_limiter, resource, batch]
+      exporters: [prometheus, debug]
+
+    # Logs pipeline (future use)
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resource, batch]
+      exporters: [debug]
+
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      level: basic

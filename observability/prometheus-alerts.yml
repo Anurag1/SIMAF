@@ -1,0 +1,80 @@
+# Prometheus Alerting Rules for Fractal VSM
+# Defines alerts for operational issues
+#
+# Author: BMad
+# Date: 2025-01-20
+
+groups:
+  - name: fractal_vsm_alerts
+    interval: 30s
+    rules:
+      # Alert if System 3 decomposition is taking too long
+      - alert: System3SlowDecomposition
+        expr: histogram_quantile(0.95, rate(fractal_vsm_vsm_tier_latency_seconds_bucket{tier="System3"}[5m])) > 300
+        for: 2m
+        labels:
+          severity: warning
+          tier: System3
+        annotations:
+          summary: "System 3 decomposition is slow"
+          description: "95th percentile latency for System 3 decomposition is {{ $value }}s (threshold: 300s)"
+
+      # Alert if LLM error rate is high
+      - alert: HighLLMErrorRate
+        expr: (rate(fractal_vsm_vsm_llm_calls_total{status="error"}[5m]) / rate(fractal_vsm_vsm_llm_calls_total[5m])) > 0.10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High LLM error rate detected"
+          description: "LLM error rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      # Alert if LLM cost is spiking
+      - alert: LLMCostSpike
+        expr: rate(fractal_vsm_vsm_llm_cost_dollars_total[1h]) > 5.0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM cost is unusually high"
+          description: "Current LLM cost rate is ${{ $value }}/hour (threshold: $5/hour)"
+
+      # Alert if verification is failing frequently
+      - alert: HighVerificationFailureRate
+        expr: rate(fractal_vsm_vsm_verification_failures_total[10m]) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High verification failure rate"
+          description: "Verification failures: {{ $value }} per second"
+
+      # Alert if no workflows have been executed recently (system may be down)
+      - alert: NoWorkflowActivity
+        expr: rate(fractal_vsm_vsm_llm_calls_total[10m]) == 0
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "No workflow activity detected"
+          description: "No LLM calls in the last 15 minutes - system may be idle or down"
+
+      # Alert if OpenTelemetry Collector is down
+      - alert: OtelCollectorDown
+        expr: up{job="otel-collector"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "OpenTelemetry Collector is down"
+          description: "Cannot collect traces/metrics from application"
+
+      # Alert if token usage is abnormally high
+      - alert: HighTokenUsage
+        expr: rate(fractal_vsm_vsm_llm_tokens_total[1h]) > 1000000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Unusually high token usage"
+          description: "Token usage rate: {{ $value }} tokens/hour (threshold: 1M/hour)"

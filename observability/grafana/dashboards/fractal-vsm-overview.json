@@ -1,0 +1,216 @@
+{
+  "title": "Fractal VSM - System Overview",
+  "uid": "fractal-vsm-overview",
+  "tags": ["fractal", "vsm", "overview"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 0,
+  "refresh": "10s",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "LLM Calls by Tier (Rate)",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_llm_calls_total[5m])",
+          "legendFormat": "{{tier}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Calls/sec" }, { "format": "short" }],
+      "legend": { "show": true, "alignAsTable": true, "values": true }
+    },
+    {
+      "id": 2,
+      "title": "Total LLM Cost (USD)",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(fractal_llm_cost_usd_total)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "green" },
+              { "value": 10, "color": "yellow" },
+              { "value": 50, "color": "red" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Total Tokens Used",
+      "type": "stat",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(fractal_llm_tokens_total)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "LLM Cache Hit Rate",
+      "type": "gauge",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(rate(fractal_llm_cache_hits_total[5m])) / sum(rate(fractal_llm_calls_total{cache_hit=\"true\"}[5m])) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "value": 0, "color": "red" },
+              { "value": 20, "color": "yellow" },
+              { "value": 50, "color": "green" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "LLM Call Latency (P50, P95, P99)",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(fractal_llm_latency_seconds_bucket[5m])) by (le, tier))",
+          "legendFormat": "{{tier}} P50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(fractal_llm_latency_seconds_bucket[5m])) by (le, tier))",
+          "legendFormat": "{{tier}} P95",
+          "refId": "B"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(fractal_llm_latency_seconds_bucket[5m])) by (le, tier))",
+          "legendFormat": "{{tier}} P99",
+          "refId": "C"
+        }
+      ],
+      "yaxes": [{ "format": "s", "label": "Latency" }, { "format": "short" }]
+    },
+    {
+      "id": 6,
+      "title": "LLM Calls by Provider",
+      "type": "piechart",
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (provider) (rate(fractal_llm_calls_total[5m]))",
+          "legendFormat": "{{provider}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "VSM Tier Tasks (Rate)",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_tier_tasks_total[5m])",
+          "legendFormat": "{{tier}} - {{task_type}} - {{status}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Tasks/sec" }, { "format": "short" }]
+    },
+    {
+      "id": 8,
+      "title": "Active Tasks by Tier",
+      "type": "graph",
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "fractal_tier_active_tasks",
+          "legendFormat": "{{tier}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "short", "label": "Active Tasks" }, { "format": "short" }]
+    },
+    {
+      "id": 9,
+      "title": "LLM Error Rate",
+      "type": "graph",
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(fractal_llm_errors_total[5m])",
+          "legendFormat": "{{tier}} - {{error_type}}",
+          "refId": "A"
+        }
+      ],
+      "yaxes": [{ "format": "ops", "label": "Errors/sec" }, { "format": "short" }],
+      "alert": {
+        "conditions": [
+          {
+            "evaluator": { "params": [0.1], "type": "gt" },
+            "operator": { "type": "and" },
+            "query": { "params": ["A", "5m", "now"] },
+            "reducer": { "params": [], "type": "avg" },
+            "type": "query"
+          }
+        ],
+        "executionErrorState": "alerting",
+        "frequency": "1m",
+        "handler": 1,
+        "name": "High LLM Error Rate",
+        "noDataState": "no_data",
+        "notifications": []
+      }
+    },
+    {
+      "id": 10,
+      "title": "Token Distribution (P50, P95)",
+      "type": "graph",
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(fractal_llm_tokens_per_call_bucket[5m])) by (le, tier))",
+          "legendFormat": "{{tier}} P50",
+          "refId": "A"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(fractal_llm_tokens_per_call_bucket[5m])) by (le, tier))",
+          "legendFormat": "{{tier}} P95",
+          "refId": "B"
+        }
+      ],
+      "yaxes": [{ "format": "short", "label": "Tokens" }, { "format": "short" }]
+    }
+  ]
+}

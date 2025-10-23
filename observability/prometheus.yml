@@ -1,0 +1,68 @@
+# Prometheus Configuration for Fractal VSM
+# Scrapes metrics from:
+# - OpenTelemetry Collector (application metrics)
+# - Prometheus exporters (if any)
+# - Application metrics endpoint (when implemented)
+#
+# Author: BMad
+# Date: 2025-01-20
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'fractal-vsm-dev'
+    environment: 'development'
+
+# Alertmanager configuration (optional, for production)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+# Load alerting rules
+rule_files:
+  - '/etc/prometheus/alerts.yml'
+
+scrape_configs:
+  # OpenTelemetry Collector metrics
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8888']
+        labels:
+          service: 'otel-collector'
+
+  # OpenTelemetry Collector's Prometheus exporter
+  # This receives metrics FROM the application
+  - job_name: 'fractal-vsm-app'
+    static_configs:
+      - targets: ['otel-collector:8889']
+        labels:
+          service: 'fractal-agent'
+
+  # Direct scrape of application metrics (when metrics server is running)
+  - job_name: 'fractal-metrics-direct'
+    static_configs:
+      - targets: ['host.docker.internal:9100']
+        labels:
+          service: 'fractal-agent-direct'
+    # Allow failures since app may not be running
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # Postgres exporter (optional, if we add it later)
+  # - job_name: 'postgres'
+  #   static_configs:
+  #     - targets: ['postgres-exporter:9187']
+
+  # Redis exporter (optional, if we add it later)
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']

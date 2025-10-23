@@ -1,0 +1,104 @@
+# Model Registry Configuration
+# Pricing and tier information for all LLM models
+#
+# Tiers:
+#   - cheap: Low cost, good for simple tasks
+#   - balanced: Medium cost/capability, good for most tasks
+#   - expensive: High capability, complex reasoning
+#   - premium: Highest capability, most expensive
+#
+# Costs are in USD per million tokens
+#
+# Author: BMad
+# Date: 2025-10-18
+
+models:
+  anthropic:
+    # Claude 4.5 Haiku - Cheap tier
+    claude-haiku-4.5:
+      tier: cheap
+      input_cost: 1.0
+      output_cost: 5.0
+      context_window: 200000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: true
+      description: "Fast and affordable Claude model for simple tasks"
+
+    # Claude 4.5 Sonnet - Balanced tier (RECOMMENDED)
+    claude-sonnet-4.5:
+      tier: balanced
+      input_cost: 3.0
+      output_cost: 15.0
+      context_window: 200000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: true
+      description: "Balanced Claude model, optimal for most tasks"
+
+    # Claude 4.1 Sonnet - Expensive tier
+    claude-sonnet-4.1:
+      tier: expensive
+      input_cost: 3.0
+      output_cost: 15.0
+      context_window: 200000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: true
+      description: "Previous generation Sonnet, still very capable"
+
+    # Claude 4.1 Opus - Premium tier
+    claude-opus-4.1:
+      tier: premium
+      input_cost: 15.0
+      output_cost: 75.0
+      context_window: 200000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: true
+      description: "Highest capability Claude model for complex reasoning"
+
+  gemini:
+    # Gemini 2.0 Flash Experimental - Cheap tier (FREE)
+    gemini-2.0-flash-exp:
+      tier: cheap
+      input_cost: 0.0
+      output_cost: 0.0
+      context_window: 1000000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: false
+      description: "Free experimental Gemini model with huge context window"
+
+    # Gemini 1.5 Flash - Cheap tier
+    gemini-1.5-flash:
+      tier: cheap
+      input_cost: 0.075
+      output_cost: 0.30
+      context_window: 1000000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: true
+      description: "Fast and affordable Gemini model"
+
+    # Gemini 1.5 Pro - Balanced tier
+    gemini-1.5-pro:
+      tier: balanced
+      input_cost: 1.25
+      output_cost: 5.0
+      context_window: 2000000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: true
+      description: "Powerful Gemini model with 2M token context"
+
+    # Gemini 1.5 Pro 002 - Expensive tier
+    gemini-1.5-pro-002:
+      tier: expensive
+      input_cost: 1.25
+      output_cost: 5.0
+      context_window: 2000000
+      supports_vision: true
+      supports_function_calling: true
+      supports_caching: true
+      description: "Latest Gemini Pro with enhanced capabilities"

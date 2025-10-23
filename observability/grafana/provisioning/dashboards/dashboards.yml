@@ -1,0 +1,19 @@
+# Grafana Dashboards Auto-Provisioning
+# Automatically loads dashboard JSON files from /var/lib/grafana/dashboards
+#
+# Author: BMad
+# Date: 2025-01-20
+
+apiVersion: 1
+
+providers:
+  - name: 'Fractal VSM Dashboards'
+    orgId: 1
+    folder: 'Fractal VSM'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 10
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: true

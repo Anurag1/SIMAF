@@ -1,0 +1,31 @@
+# Grafana Datasources Auto-Provisioning
+# Automatically configures Prometheus and Jaeger as datasources
+#
+# Author: BMad
+# Date: 2025-01-20
+
+apiVersion: 1
+
+datasources:
+  # Prometheus datasource
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+      queryTimeout: "60s"
+
+  # Jaeger datasource for traces
+  - name: Jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    isDefault: false
+    editable: false
+    jsonData:
+      tracesToLogs:
+        datasourceUid: 'loki'  # If we add Loki later
+        tags: ['trace_id', 'span_id']
